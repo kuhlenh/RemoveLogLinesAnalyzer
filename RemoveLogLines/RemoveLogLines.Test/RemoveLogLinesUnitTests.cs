@@ -37,22 +37,32 @@ namespace RemoveLogLines.Test
     {
         class TypeName
         {   
+            static void Main(string[] args){
+                var log = new Logger();
+                log.LogLine(""Log Line"");
+            }
+        }
+        
+        class Logger{
+            public void LogLine(string a){
+                
+            }
         }
     }";
             var expected = new DiagnosticResult
             {
                 Id = "RemoveLogLines",
-                Message = String.Format("Type name '{0}' contains lowercase letters", "TypeName"),
-                Severity = DiagnosticSeverity.Warning,
+                Message = "Clean up logs before commit.",
+                Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {
-                            new DiagnosticResultLocation("Test0.cs", 11, 15)
+                            new DiagnosticResultLocation("Test0.cs", 15, 17)
                         }
             };
 
             VerifyCSharpDiagnostic(test, expected);
 
-            var fixtest = @"
+			var fixtest = @"
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -62,14 +72,23 @@ namespace RemoveLogLines.Test
 
     namespace ConsoleApplication1
     {
-        class TYPENAME
+        class TypeName
         {   
+            static void Main(string[] args){
+                var log = new Logger();
+            }
+        }
+        
+        class Logger{
+            public void LogLine(string a){
+                
+            }
         }
     }";
-            VerifyCSharpFix(test, fixtest);
-        }
+			VerifyCSharpFix(test, fixtest);
+		}
 
-        protected override CodeFixProvider GetCSharpCodeFixProvider()
+		protected override CodeFixProvider GetCSharpCodeFixProvider()
         {
             return new RemoveLogLinesCodeFixProvider();
         }

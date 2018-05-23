@@ -18,15 +18,23 @@ namespace RemoveLogLines {
 
 		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get { return ImmutableArray.Create(Rule); } }
 
-		public override void Initialize(AnalysisContext context) {
+		public override void Initialize(AnalysisContext context)
+		{
 			context.RegisterSyntaxNodeAction(AnalyzeNode, SyntaxKind.InvocationExpression);
 		}
 
-		private void AnalyzeNode(SyntaxNodeAnalysisContext context) {
+		private void AnalyzeNode(SyntaxNodeAnalysisContext context)
+		{
+			// grab our syntax node for our invocation expression
 			var invocation = (InvocationExpressionSyntax)context.Node;
+			// get our semantic information from the symbol
 			var symbolInfo = context.SemanticModel.GetSymbolInfo(invocation.Expression);
-			if (symbolInfo.Symbol is IMethodSymbol methodSymbol) {
-				if (methodSymbol.Name == "LogLine") {
+			// use pattern-matching to see if we have a method symbol
+			// and then grab the name of the method
+			if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
+			{
+				if (methodSymbol.Name == "LogLine")
+				{
 					var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation());
 					context.ReportDiagnostic(diagnostic);
 				}
